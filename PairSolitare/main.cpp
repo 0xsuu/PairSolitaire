@@ -291,7 +291,7 @@ void doSearch(State s)
 	}
 	else
 	{
-		int maxIndex = searchWithDepthAndWidth(*s.state, 0, 0); //Setting search depth here
+		int maxIndex = searchWithDepthAndWidth(*s.state, 28, 2); //Setting search depth here
 		
 		uint8_t del = s.state->at(maxIndex);
 		if (((del & 0b110000)>>4) == 0)
@@ -389,8 +389,11 @@ int main(int argc, const char * argv[])
 	//uint8_t board[52] = {HE 13, DI 2, SP 6, DI 12, HE 11, DI 5, DI 13, CL 13, SP 9, HE 6, HE 2, HE 9, DI 1, DI 3, HE 7, DI 4, CL 5, CL 9, SP 10, SP 13, SP 2, SP 8, SP 4, SP 5, HE 3, CL 7, SP 3, CL 1, CL 8, CL 2, CL 12, SP 12, DI 7, DI 9, HE 1, CL 11, SP 11, HE 12, HE 10, HE 4, DI 11, DI 8, SP 1, DI 10, HE 5, CL 4, SP 7, HE 8, CL 6, CL 10, CL 3, DI 6};
 	//2 18/3
 	
-	uint8_t board[52] = {CL 1, DI 4, HE 7, SP 1, CL 9, SP 11, DI 2, CL 7, DI 8, CL 11, HE 5, HE 2, CL 13, HE 13, DI 13, CL 2, DI 6, DI 1, DI 9, CL 4, SP 6, CL 10, DI 5, CL 12, SP 12, DI 11, SP 13, CL 5, SP 4, HE 12, SP 2, DI 3, HE 4, DI 7, SP 3, HE 10, HE 1, HE 8, SP 5, HE 9, SP 7, DI 10, SP 8, SP 9, CL 8, HE 11, SP 10, CL 3, HE 6, HE 3, CL 6, DI 12};
+	//uint8_t board[52] = {CL 1, DI 4, HE 7, SP 1, CL 9, SP 11, DI 2, CL 7, DI 8, CL 11, HE 5, HE 2, CL 13, HE 13, DI 13, CL 2, DI 6, DI 1, DI 9, CL 4, SP 6, CL 10, DI 5, CL 12, SP 12, DI 11, SP 13, CL 5, SP 4, HE 12, SP 2, DI 3, HE 4, DI 7, SP 3, HE 10, HE 1, HE 8, SP 5, HE 9, SP 7, DI 10, SP 8, SP 9, CL 8, HE 11, SP 10, CL 3, HE 6, HE 3, CL 6, DI 12};
 	//2 19/3
+	
+	uint8_t board[52] = {DI 2, CL 11, HE 9, DI 4, SP 10, CL 9, HE 2, DI 9, HE 7, HE 1, HE 13, CL 1, SP 3, SP 9, CL 8, CL 13, CL 4, SP 12, SP 5, SP 11, HE 10, SP 4, DI 5, DI 8, DI 7, DI 11, SP 2, CL 10, CL 12, HE 8, CL 7, DI 1, SP 8, SP 7, DI 3, HE 3, DI 6, DI 13, CL 5, CL 3, HE 11, SP 13, HE 5, DI 12, HE 4, HE 12, CL 6, HE 6, CL 2, DI 10, SP 1, SP 6};
+	//2 20/3
 	
 	vector<uint8_t> *question = new vector<uint8_t>(board, board + sizeof(board) / sizeof(uint8_t));
 	
