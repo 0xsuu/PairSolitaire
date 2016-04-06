@@ -35,11 +35,6 @@ int heu(vector<uint8_t> state)
 		return 0;
 	}
 	
-	if (state.size()==2 && (((state[0]&0b110000) == (state[1]&0b110000)) || ((state[0]&0xf) == (state[1]&0xf))))
-	{
-		return 1;
-	}
-	
 	for (vector<uint8_t>::iterator it = state.begin() ; it != state.end()-2; ++it)
 	{
 		if ((((*it) & 0b110000)>>4) == (((*(it+2)) & 0b110000)>>4))
@@ -80,6 +75,20 @@ public:
 	Max *prev;
 };
 
+bool compareTwoNumbers(uint8_t n1, uint8_t n2)
+{
+	if (n1 == 1)
+	{
+		n1 = 14;
+	}
+	
+	if (n2 == 1)
+	{
+		n2 = 14;
+	}
+	
+	return n1>n2;
+}
 
 void expandWithMax(vector<Max *> *storage, Max *m, vector<uint8_t> state, int depth, int width)
 {
@@ -99,6 +108,7 @@ void expandWithMax(vector<Max *> *storage, Max *m, vector<uint8_t> state, int de
 	{
 		Max *empty = new Max(0, -1, NULL);
 		vector<Max *> toExpand = vector<Max *>(width, empty);
+		vector<uint8_t> numbers = vector<uint8_t>(width, 0);
 		for (vector<uint8_t>::iterator it = state.begin() ; it != state.end()-2; ++it)
 		{
 			bool expand = false;
@@ -122,9 +132,12 @@ void expandWithMax(vector<Max *> *storage, Max *m, vector<uint8_t> state, int de
 					if (toExpand[width-1]->heu!=-1)
 						delete toExpand[width-1];
 					toExpand.pop_back();
+					numbers.pop_back();
 					
 					Max *max1 = new Max(int(distance(state.begin(), it)), heu(tmp), m);
 					toExpand.push_back(max1);
+					uint8_t number = (*it) & 0xf;
+					numbers.push_back(number);
 					int max1Pos = width-1;
 					
 					for (vector<Max *>::iterator it=toExpand.end()-1; it>=toExpand.begin(); --it)
@@ -132,6 +145,13 @@ void expandWithMax(vector<Max *> *storage, Max *m, vector<uint8_t> state, int de
 						if (max1->heu > (*it)->heu)
 						{
 							iter_swap(toExpand.begin()+max1Pos, it);
+							iter_swap(numbers.begin()+max1Pos, numbers.begin()+distance(toExpand.begin(), it));
+							max1Pos = int(distance(toExpand.begin(), it));
+						}
+						else if ((max1->heu == (*it)->heu) && compareTwoNumbers(number, numbers[distance(toExpand.begin(), it)]))
+						{
+							iter_swap(toExpand.begin()+max1Pos, it);
+							iter_swap(numbers.begin()+max1Pos, numbers.begin()+distance(toExpand.begin(), it));
 							max1Pos = int(distance(toExpand.begin(), it));
 						}
 					}
@@ -147,9 +167,12 @@ void expandWithMax(vector<Max *> *storage, Max *m, vector<uint8_t> state, int de
 					if (toExpand[width-1]->heu!=-1)
 						delete toExpand[width-1];
 					toExpand.pop_back();
+					numbers.pop_back();
 					
 					Max *max2 = new Max(int(distance(state.begin(), it+2)), heu(tmp2), m);
 					toExpand.push_back(max2);
+					uint8_t number = (*(it+2)) & 0xf;
+					numbers.push_back(number);
 					int max2Pos = width-1;
 					
 					for (vector<Max *>::iterator it=toExpand.end()-1; it>=toExpand.begin(); --it)
@@ -157,11 +180,17 @@ void expandWithMax(vector<Max *> *storage, Max *m, vector<uint8_t> state, int de
 						if (max2->heu > (*it)->heu)
 						{
 							iter_swap(toExpand.begin()+max2Pos, it);
+							iter_swap(numbers.begin()+max2Pos, numbers.begin()+distance(toExpand.begin(), it));
+							max2Pos = int(distance(toExpand.begin(), it));
+						}
+						else if ((max2->heu == (*it)->heu) && compareTwoNumbers(number, numbers[distance(toExpand.begin(), it)]))
+						{
+							iter_swap(toExpand.begin()+max2Pos, it);
+							iter_swap(numbers.begin()+max2Pos, numbers.begin()+distance(toExpand.begin(), it));
 							max2Pos = int(distance(toExpand.begin(), it));
 						}
 					}
 				}
-				
 				//expandWithMax(storage, max2, tmp2, depth-1);
 			}
 		}
@@ -196,17 +225,17 @@ int searchWithDepthAndWidth(vector<uint8_t> state, int depth, int width)
 		}
 		else if (heu(state) >= 15)
 		{
-			depth = 6;
-			width = 10;
+			depth = 9;
+			width = 5;
 		}
 		else if (heu(state) >= 10)
 		{
-			depth = 24;
+			depth = 25;
 			width = 2;
 		}
 		else if (heu(state) >= 5)
 		{
-			depth = 24;
+			depth = 25;
 			width = 2;
 		}
 		else if (heu(state) < 5)
@@ -291,7 +320,7 @@ void doSearch(State s)
 	}
 	else
 	{
-		int maxIndex = searchWithDepthAndWidth(*s.state, 28, 2); //Setting search depth here
+		int maxIndex = searchWithDepthAndWidth(*s.state, 20, 2); //Setting search depth here
 		
 		uint8_t del = s.state->at(maxIndex);
 		if (((del & 0b110000)>>4) == 0)
@@ -387,13 +416,19 @@ int main(int argc, const char * argv[])
 	//2 17/3
 	
 	//uint8_t board[52] = {HE 13, DI 2, SP 6, DI 12, HE 11, DI 5, DI 13, CL 13, SP 9, HE 6, HE 2, HE 9, DI 1, DI 3, HE 7, DI 4, CL 5, CL 9, SP 10, SP 13, SP 2, SP 8, SP 4, SP 5, HE 3, CL 7, SP 3, CL 1, CL 8, CL 2, CL 12, SP 12, DI 7, DI 9, HE 1, CL 11, SP 11, HE 12, HE 10, HE 4, DI 11, DI 8, SP 1, DI 10, HE 5, CL 4, SP 7, HE 8, CL 6, CL 10, CL 3, DI 6};
-	//2 18/3
+	//2 18/3 scored 3 on leaderboard
 	
 	//uint8_t board[52] = {CL 1, DI 4, HE 7, SP 1, CL 9, SP 11, DI 2, CL 7, DI 8, CL 11, HE 5, HE 2, CL 13, HE 13, DI 13, CL 2, DI 6, DI 1, DI 9, CL 4, SP 6, CL 10, DI 5, CL 12, SP 12, DI 11, SP 13, CL 5, SP 4, HE 12, SP 2, DI 3, HE 4, DI 7, SP 3, HE 10, HE 1, HE 8, SP 5, HE 9, SP 7, DI 10, SP 8, SP 9, CL 8, HE 11, SP 10, CL 3, HE 6, HE 3, CL 6, DI 12};
 	//2 19/3
 	
-	uint8_t board[52] = {DI 2, CL 11, HE 9, DI 4, SP 10, CL 9, HE 2, DI 9, HE 7, HE 1, HE 13, CL 1, SP 3, SP 9, CL 8, CL 13, CL 4, SP 12, SP 5, SP 11, HE 10, SP 4, DI 5, DI 8, DI 7, DI 11, SP 2, CL 10, CL 12, HE 8, CL 7, DI 1, SP 8, SP 7, DI 3, HE 3, DI 6, DI 13, CL 5, CL 3, HE 11, SP 13, HE 5, DI 12, HE 4, HE 12, CL 6, HE 6, CL 2, DI 10, SP 1, SP 6};
+	//uint8_t board[52] = {DI 2, CL 11, HE 9, DI 4, SP 10, CL 9, HE 2, DI 9, HE 7, HE 1, HE 13, CL 1, SP 3, SP 9, CL 8, CL 13, CL 4, SP 12, SP 5, SP 11, HE 10, SP 4, DI 5, DI 8, DI 7, DI 11, SP 2, CL 10, CL 12, HE 8, CL 7, DI 1, SP 8, SP 7, DI 3, HE 3, DI 6, DI 13, CL 5, CL 3, HE 11, SP 13, HE 5, DI 12, HE 4, HE 12, CL 6, HE 6, CL 2, DI 10, SP 1, SP 6};
 	//2 20/3
+	
+	//uint8_t board[52] = {CL 7, DI 13, SP 11, HE 1, HE 7, DI 5, HE 13, DI 9, CL 3, DI 11, HE 8, SP 1, HE 9, DI 7, SP 6, SP 13,  SP 3, CL 10, CL 8, CL 2, CL 13, CL 1, DI 6, DI 3, SP 10, DI 12, DI 10, DI 2, CL 5, HE 6, SP 4, CL 11, HE 10, HE 3, SP 7, SP 12, CL 6, CL 12, SP 8, CL 9, CL 4, HE 2, DI 8, SP 2, DI 1, HE 12, HE 5, SP 5, SP 9, HE 11, DI 4, HE 4};
+	//2(4 4) 3/4
+	
+	uint8_t board[52] = {CL 10, SP 11, SP 1, CL 6, CL 12, CL 9, CL 5, DI 5, DI 3, DI 12, HE 12, SP 4, HE 2, DI 6, HE 10, HE 4, SP 2, DI 11, HE 6, CL 3, CL 4, SP 6, SP 3, SP 5, HE 1, CL 8, HE 11, DI 13, DI 7, SP 9, CL 11, DI 1, HE 5, DI 4, CL 2, HE 13, DI 10, CL 13, HE 7, SP 13, CL 7, SP 12, HE 8, HE 9, SP 8, DI 2, SP 10, DI 9, SP 7, DI 8, CL 1, HE 3};
+	// 4/4
 	
 	vector<uint8_t> *question = new vector<uint8_t>(board, board + sizeof(board) / sizeof(uint8_t));
 	
